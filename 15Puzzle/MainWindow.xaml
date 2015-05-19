@@ -1,8 +1,112 @@
 ﻿<Window x:Class="_15Puzzle.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+        xmlns:vm="clr-namespace:_15Puzzle.ViewModels"
+        xmlns:local="clr-namespace:_15Puzzle"
+        Title="15Puzzle" Height="380" Width="640"  MinHeight="380">
     <Grid>
-        
+        <Grid.DataContext>
+            <vm:MainViewModel/>
+        </Grid.DataContext>
+        <Menu Height="30" VerticalAlignment="Top">
+            <Menu.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
+            </Menu.Background>
+            <MenuItem Header="File" Height="30" Width="50" FontSize="12">
+                <MenuItem Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" />
+                <Separator />
+                <MenuItem Header="_Exit" Command="{Binding ExitCommand, Mode=OneWay}" />
+            </MenuItem>
+        </Menu>
+
+        <Grid Margin="0,55,0,25">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="300"/>
+                <ColumnDefinition Width="1*" MinWidth="100"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition MinHeight="200"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Grid.Column="0">
+                <Grid Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" 
+                      Grid.ColumnSpan="3" 
+                      Grid.RowSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="8*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Canvas Name="PuzzleCanvas" Grid.Row="1" Grid.Column="1" 
+                            local:SizeObserver.Observe="True" 
+                            local:SizeObserver.ObservedWidth="{Binding ActualWidth, Mode=OneWayToSource}"
+                            local:SizeObserver.ObservedHeight="{Binding ActualHeight, Mode=OneWayToSource}" Background="SkyBlue">
+                        <Image HorizontalAlignment="Left" Height="{Binding ActualHeight, ElementName=PuzzleCanvas}" Width="{Binding ActualWidth}" VerticalAlignment="Top" Source="{Binding Image00}" Canvas.Left="10" Canvas.Top="{Binding ActualHeight/4, ElementName=PuzzleCanvas}"/>
+                        <Image HorizontalAlignment="Left" Height="{Binding ActualHeight, ElementName=PuzzleCanvas}" VerticalAlignment="Top" Width="{Binding ActualWidth}" Source="{Binding Image01}" Canvas.Left="168"/>
+
+                    </Canvas>
+                </Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}"/>
+                </Grid.RowDefinitions>
+            </Grid>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="5*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="1" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5"/>
+                    <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="55" >
+                        <Run Text="00:00" />
+                    </TextBlock>
+                </Grid>
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <ComboBox Name="comboImage" Grid.Column="1" Grid.Row="0" Margin="5" 
+                              MaxWidth="300" MaxHeight="50" MinWidth="80" />
+                    <Button Name="btnStart" Content="Start" Grid.Column="1" Grid.Row="1" Margin="5"
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
+                    <Button Name="btnHint" Content="Hint" Grid.Column="1" Grid.Row="2" Margin="5"
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
+                    <Button Name="btnSolveAll" Content="Solve All"  Grid.Column="1" Grid.Row="3" Margin="5" 
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
+                </Grid>
+
+            </Grid>
+
+        </Grid>
+        <ToolBar Margin="0,30,0,0" VerticalAlignment="Top" Height="25">
+            <ToolBar.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
+            </ToolBar.Background>
+        </ToolBar>
+        <StatusBar DockPanel.Dock="Bottom" Height="25" VerticalAlignment="Bottom">
+            <StatusBar.Background>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
+            </StatusBar.Background>
+        </StatusBar>
     </Grid>
 </Window>
