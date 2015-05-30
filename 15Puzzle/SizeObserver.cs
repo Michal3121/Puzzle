@@ -70,7 +70,7 @@ namespace _15Puzzle
             {
                 frameworkElement.SizeChanged += OnFrameworkElementSizeChanged;
                 UpdateObservedSizesForFrameworkElement(frameworkElement);
-                Console.WriteLine("---------------------------------");
+                //Console.WriteLine("---------------------------------");
             }
             else
             {

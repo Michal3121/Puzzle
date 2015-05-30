@@ -54,8 +54,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Exceptions.cs" />
+    <Compile Include="ImageSplitter.cs" />
+    <Compile Include="Matrix.cs" />
+    <Compile Include="PuzzleImage.cs" />
+    <Compile Include="PuzzleManager.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="SizeObserver.cs" />
+    <Compile Include="Solver.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -87,6 +92,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

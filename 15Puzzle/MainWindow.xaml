@@ -3,52 +3,77 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:_15Puzzle.ViewModels"
         xmlns:local="clr-namespace:_15Puzzle"
-        Title="15Puzzle" Height="380" Width="640"  MinHeight="380">
+        Title="15Puzzle" Height="458" Width="525"  MinHeight="458" KeyDown="Window_KeyDown">
+    <Window.Resources>
+            </Window.Resources>
     <Grid>
         <Grid.DataContext>
             <vm:MainViewModel/>
         </Grid.DataContext>
-        <Menu Height="30" VerticalAlignment="Top">
+        <Menu Height="20" VerticalAlignment="Top">
             <Menu.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
             </Menu.Background>
-            <MenuItem Header="File" Height="30" Width="50" FontSize="12">
+            <MenuItem Header="File" Height="30" Width="50" FontSize="12" Focusable="False">
                 <MenuItem Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" />
                 <Separator />
                 <MenuItem Header="_Exit" Command="{Binding ExitCommand, Mode=OneWay}" />
             </MenuItem>
         </Menu>
-
-        <Grid Margin="0,55,0,25">
+ 
+        <Grid Margin="0,45,0,25">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" MinWidth="300"/>
+                <ColumnDefinition Width="2*" MinWidth="350"/>
                 <ColumnDefinition Width="1*" MinWidth="100"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition MinHeight="200"/>
+                <RowDefinition Height="350"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" Grid.Column="0">
-                <Grid Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" 
-                      Grid.ColumnSpan="3" 
-                      Grid.RowSpan="3">
+            <Grid x:Name="Grid_1" Grid.Row="0" Grid.Column="0">
+                <Grid Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8*"/>
+                        <ColumnDefinition Width="320"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="8*"/>
+                        <RowDefinition Height="320"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Canvas Name="PuzzleCanvas" Grid.Row="1" Grid.Column="1" 
-                            local:SizeObserver.Observe="True" 
-                            local:SizeObserver.ObservedWidth="{Binding ActualWidth, Mode=OneWayToSource}"
-                            local:SizeObserver.ObservedHeight="{Binding ActualHeight, Mode=OneWayToSource}" Background="SkyBlue">
-                        <Image HorizontalAlignment="Left" Height="{Binding ActualHeight, ElementName=PuzzleCanvas}" Width="{Binding ActualWidth}" VerticalAlignment="Top" Source="{Binding Image00}" Canvas.Left="10" Canvas.Top="{Binding ActualHeight/4, ElementName=PuzzleCanvas}"/>
-                        <Image HorizontalAlignment="Left" Height="{Binding ActualHeight, ElementName=PuzzleCanvas}" VerticalAlignment="Top" Width="{Binding ActualWidth}" Source="{Binding Image01}" Canvas.Left="168"/>
+                    <ItemsControl x:Name="itemsControl" ItemsSource="{Binding PuzzleCardsList, Mode=TwoWay}"  Grid.Row="1" Grid.Column="1" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
+                             ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas Name="PuzzleCanvas"
+                                        local:SizeObserver.Observe="True" 
+                                        local:SizeObserver.ObservedWidth="{Binding ActualCanvasWidth, Mode=OneWayToSource}"
+                                        local:SizeObserver.ObservedHeight="{Binding ActualCanvasHeight, Mode=OneWayToSource}"
+                                        Width="{Binding ActualCanvasHeight, Mode=OneWayToSource}" Height="{Binding ActualCanvasHeight, Mode=OneWayToSource}"  />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        
+                        <ItemsControl.ItemContainerStyle>
+                            <Style >
+                                <Setter Property="Canvas.Left" Value="{Binding X_CanvasPosition}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y_CanvasPosition}"/>
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
 
-                    </Canvas>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="local:PuzzleImage">
+
+
+                                <Image  Height="80" Width="80" Source="{Binding Image}" Focusable="True" MouseLeftButtonDown="FileImage_OnMouseUp"  />
+                               
+                            </DataTemplate>
+                            
+
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+
                 </Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -67,9 +92,17 @@
                         <ColumnDefinition Width="3*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="1" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5"/>
-                    <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="55" >
-                        <Run Text="00:00" />
+                    <Grid Grid.Column="1" Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Button Grid.Column="0" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinue}" Focusable="False" />
+                        <Button Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStop}" Focusable="False" />
+                    </Grid>
+                    
+                    <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Text="{Binding Path=Time, Mode=TwoWay}" >
+                        
                     </TextBlock>
                 </Grid>
                 <Grid Grid.Row="1" Grid.Column="0">
@@ -86,27 +119,29 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <ComboBox Name="comboImage" Grid.Column="1" Grid.Row="0" Margin="5" 
-                              MaxWidth="300" MaxHeight="50" MinWidth="80" />
+                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" />
                     <Button Name="btnStart" Content="Start" Grid.Column="1" Grid.Row="1" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
-                    <Button Name="btnHint" Content="Hint" Grid.Column="1" Grid.Row="2" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
+                            MaxWidth="200" MaxHeight="60" MinWidth="80" Command="{Binding TimerStart}" Focusable="False" />
+                    <Button Name="btnShuffle" Content="Shuffle" Grid.Column="1" Grid.Row="2" Margin="5"
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Command="{Binding Suffle}" Focusable="False"/>
                     <Button Name="btnSolveAll" Content="Solve All"  Grid.Column="1" Grid.Row="3" Margin="5" 
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"/>
+                            MaxWidth="200" MaxHeight="60" MinWidth="80" Focusable="False"/>
                 </Grid>
 
             </Grid>
 
         </Grid>
-        <ToolBar Margin="0,30,0,0" VerticalAlignment="Top" Height="25">
+        <ToolBar Margin="0,20,0,0" VerticalAlignment="Top" Height="25">
             <ToolBar.Background>
                 <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
             </ToolBar.Background>
         </ToolBar>
         <StatusBar DockPanel.Dock="Bottom" Height="25" VerticalAlignment="Bottom">
             <StatusBar.Background>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
+                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientActiveCaptionColorKey}}"/>
             </StatusBar.Background>
+            <Label Name="Shuffling" Content="" />
+            <ProgressBar Height="10" Width="100"/>
         </StatusBar>
     </Grid>
 </Window>
