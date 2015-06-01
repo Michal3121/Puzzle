@@ -3,25 +3,32 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:_15Puzzle.ViewModels"
         xmlns:local="clr-namespace:_15Puzzle"
-        Title="15Puzzle" Height="458" Width="525"  MinHeight="458" KeyDown="Window_KeyDown">
-    <Window.Resources>
-            </Window.Resources>
+        Title="15Puzzle" Height="433" Width="525" MinHeight="433" ResizeMode="NoResize" KeyDown="Window_KeyDown">
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ExitCommand, Mode=OneWay}" Gesture="CTRL+X" />
+        <KeyBinding Command="{Binding OpenCommand, Mode=OneWay}" Gesture="CTRL+O" />
+        <KeyBinding Command="{Binding ShuffleCommand}" Gesture="CTRL+T" />
+        <KeyBinding Command="{Binding TimerContinueCommand}" Gesture="CTRL+C" />
+        <KeyBinding Command="{Binding TimerStopCommand}" Gesture="CTRL+P"/>
+    </Window.InputBindings>
     <Grid>
-        <Grid.DataContext>
-            <vm:MainViewModel/>
-        </Grid.DataContext>
         <Menu Height="20" VerticalAlignment="Top">
-            <Menu.Background>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.HighlightColorKey}}"/>
-            </Menu.Background>
-            <MenuItem Header="File" Height="30" Width="50" FontSize="12" Focusable="False">
+            <MenuItem Header="_File" Focusable="False">
                 <MenuItem Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" />
                 <Separator />
-                <MenuItem Header="_Exit" Command="{Binding ExitCommand, Mode=OneWay}" />
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand, Mode=OneWay}"  />
+            </MenuItem>
+            <MenuItem Header="_Options" Focusable="False" Command="{Binding OptionsDialogCommand, Mode=OneWay}" />
+            <MenuItem Header="_Help" Focusable="False">
+                <MenuItem Header="User _manual..."/>
+                <MenuItem Header="_About 15 Puzzle..."/>
             </MenuItem>
         </Menu>
- 
-        <Grid Margin="0,45,0,25">
+
+        <Grid Margin="0,20,0,25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" MinWidth="350"/>
                 <ColumnDefinition Width="1*" MinWidth="100"/>
@@ -30,7 +37,7 @@
                 <RowDefinition Height="350"/>
             </Grid.RowDefinitions>
             <Grid x:Name="Grid_1" Grid.Row="0" Grid.Column="0">
-                <Grid Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="320"/>
@@ -64,7 +71,6 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="local:PuzzleImage">
 
-
                                 <Image  Height="80" Width="80" Source="{Binding Image}" Focusable="True" MouseLeftButtonDown="FileImage_OnMouseUp"  />
                                
                             </DataTemplate>
@@ -97,8 +103,8 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Grid.Column="0" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinue}" Focusable="False" />
-                        <Button Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStop}" Focusable="False" />
+                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" Focusable="False" />
+                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" Focusable="False" />
                     </Grid>
                     
                     <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Text="{Binding Path=Time, Mode=TwoWay}" >
@@ -108,7 +114,7 @@
                 <Grid Grid.Row="1" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="4*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -118,30 +124,33 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ComboBox Name="comboImage" Grid.Column="1" Grid.Row="0" Margin="5" 
-                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" />
-                    <Button Name="btnStart" Content="Start" Grid.Column="1" Grid.Row="1" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80" Command="{Binding TimerStart}" Focusable="False" />
+                    
+                    <Grid Grid.Column="1" Grid.Row="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Name="chooseLabel" Grid.Column="1" Grid.Row="0" Content="Choose a picture" HorizontalAlignment="Center"  />
+                        <ComboBox Name="comboImage" Grid.Column="1" Grid.Row="1" 
+                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" />    
+                    </Grid>
+                    
+                    <Button Name="btnStartGame" Content="New game" Grid.Column="1" Grid.Row="1" Margin="5"
+                            MaxWidth="200" MaxHeight="60" MinWidth="80" Command="{Binding StartNewGameCommand}" Focusable="False" />
                     <Button Name="btnShuffle" Content="Shuffle" Grid.Column="1" Grid.Row="2" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Command="{Binding Suffle}" Focusable="False"/>
-                    <Button Name="btnSolveAll" Content="Solve All"  Grid.Column="1" Grid.Row="3" Margin="5" 
-                            MaxWidth="200" MaxHeight="60" MinWidth="80" Focusable="False"/>
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Command="{Binding SuffleCommand}" Focusable="False"/>
                 </Grid>
 
             </Grid>
-
         </Grid>
-        <ToolBar Margin="0,20,0,0" VerticalAlignment="Top" Height="25">
-            <ToolBar.Background>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightLightColorKey}}"/>
-            </ToolBar.Background>
-        </ToolBar>
+        
         <StatusBar DockPanel.Dock="Bottom" Height="25" VerticalAlignment="Bottom">
             <StatusBar.Background>
-                <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientActiveCaptionColorKey}}"/>
+                <SolidColorBrush Color="LightGray"/>
             </StatusBar.Background>
             <Label Name="Shuffling" Content="" />
             <ProgressBar Height="10" Width="100"/>
         </StatusBar>
     </Grid>
+   
 </Window>

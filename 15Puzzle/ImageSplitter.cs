@@ -15,12 +15,12 @@ namespace _15Puzzle
         private double imageHeight;
         private Uri path;
 
-        public ImageSplitter(Uri fileName)
+        public ImageSplitter(BitmapImage image)
         {
             try
             {
-                this.bitmapImageTmp = new BitmapImage(fileName);
-                this.path = fileName;
+                //this.bitmapImageTmp = new BitmapImage(fileName);
+                this.bitmapImageTmp = image;
             }
             catch (NotSupportedException ex1)
             {
@@ -41,8 +41,8 @@ namespace _15Puzzle
                 throw new ArgumentNullException(ex3.Source, ex3);
             }*/
 
-            this.imageWidth = bitmapImageTmp.Width;
-            this.imageHeight = bitmapImageTmp.Height;
+            this.imageWidth = bitmapImageTmp.PixelWidth;
+            this.imageHeight = bitmapImageTmp.PixelHeight;
 
             if (imageWidth != imageHeight)
             {
@@ -112,8 +112,8 @@ namespace _15Puzzle
             imageRet.DecodePixelHeight = (int)this.bitmapImageTmp.Height + heightDifference;
             imageRet.EndInit();
 
-            this.imageWidth = imageRet.Width;
-            this.imageHeight = imageRet.Height;
+            this.imageWidth = imageRet.PixelWidth;
+            this.imageHeight = imageRet.PixelHeight;
 
             return imageRet;
         }
