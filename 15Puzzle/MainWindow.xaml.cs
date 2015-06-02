@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -35,41 +36,49 @@ namespace _15Puzzle
             var frameworkElement = (FrameworkElement)sender;
             var puzzleClicked = frameworkElement.DataContext as _15Puzzle.PuzzleImage; 
             var viewModel = this.itemsControl.DataContext as ViewModels.MainViewModel;
-            
-            IList<PuzzleImage> tmp = puzzleManager.Swap(puzzleClicked, viewModel.PuzzleCardsList);
-            viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp); 
 
-            //var fileImage = (IInputElement)frameworkElement.FindName("Image");
-            //var point = e.GetPosition(fileImage);
+            if (viewModel.GameStarted)
+            {
+                IList<PuzzleImage> tmp = puzzleManager.Swap(puzzleClicked, viewModel.PuzzleCardsList);
+                viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
+            }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            //var frameworkElement = (Image)sender;
-            //double aux = frameworkElement.ActualHeight;
-            //var viewModel = frameworkElement.DataContext as _15Puzzle.PuzzleImage;
-
-            var viewModel = this.itemsControl.DataContext as ViewModels.MainViewModel;
-            IList<PuzzleImage> tmp;
-            switch (e.Key)
+        {           
+            var frameworkElement = (FrameworkElement)sender;
+            var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
+            if (viewModel.GameStarted)
             {
-                case Key.Up:
-                    tmp = puzzleManager.Swap("up", viewModel.PuzzleCardsList);
-                    viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
-                    break;
-                case Key.Down:
-                    tmp = puzzleManager.Swap("down", viewModel.PuzzleCardsList);
-                    viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
-                    break;
-                case Key.Left:
-                    tmp = puzzleManager.Swap("left", viewModel.PuzzleCardsList);
-                    viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
-                    break;
-                case Key.Right:
-                    tmp = puzzleManager.Swap("right", viewModel.PuzzleCardsList);
-                    viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
-                    break;
+                IList<PuzzleImage> tmp;
+                switch (e.Key)
+                {
+                    case Key.Up:
+                        tmp = puzzleManager.Swap("up", viewModel.PuzzleCardsList);
+                        viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
+                        break;
+                    case Key.Down:
+                        tmp = puzzleManager.Swap("down", viewModel.PuzzleCardsList);
+                        viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
+                        break;
+                    case Key.Left:
+                        tmp = puzzleManager.Swap("left", viewModel.PuzzleCardsList);
+                        viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
+                        break;
+                    case Key.Right:
+                        tmp = puzzleManager.Swap("right", viewModel.PuzzleCardsList);
+                        viewModel.PuzzleCardsList = new ObservableCollection<PuzzleImage>(tmp);
+                        break;
+                }
             }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var frameworkElement = (FrameworkElement)sender;
+            var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
+
+            viewModel.SaveRegistry();
         }
     }
 }

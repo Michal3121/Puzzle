@@ -19,74 +19,92 @@ namespace _15Puzzle.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
-        //private Solver solver;
-        private MatrixNode matrix;
-        private MatrixManager matrixManager = new MatrixManager();
-        private long timeElapsed; 
+        private long timeElapsed;
         private DispatcherTimer timer;
         private PuzzleManager puzzleManager;
-        private bool canNewGameExecute = true;
         Thread threadShuffle;
         private delegate void changeCanExecuteDelegat();
-        private BitmapImage aux;
+        private BitmapImage imageWood;
+        private BitmapImage imageGrey;
+        private BitmapImage imagePaint;
+        private BitmapImage imageRafael;
+        private int difficulty;
+        private int difficultyIndex;
+        private BitmapImage defaultImage;
+        private int defaultImageIndex;
         
         public MainViewModel()
         {
+            this.LoadRegistry();
             this.timeElapsed = 0;
             this.timer = new DispatcherTimer();
             this._actualCanvasHeight = 320;
             this._actualCanvasWidth = 320;
             this.puzzleManager = new PuzzleManager();
-            this.aux = new BitmapImage(new Uri("pack://application:,,,/Images/Rafael2.jpg", UriKind.Absolute));
-            //this._imageSplit = new ImageSplitter(aux);
-            this.Image2Collection(aux);
-            
-            //this._imageSplit = Properties.Resources.Grey;
+            this.imageWood = new BitmapImage(new Uri("pack://application:,,,/Images/Wood.jpg", UriKind.Absolute));
+            this.imageGrey = new BitmapImage(new Uri("pack://application:,,,/Images/Grey.jpg", UriKind.Absolute));
+            this.imagePaint = new BitmapImage(new Uri("pack://application:,,,/Images/Paint.jpg", UriKind.Absolute));
+            this.imageRafael = new BitmapImage(new Uri("pack://application:,,,/Images/Rafael.jpg", UriKind.Absolute));
+            this.difficulty = this.GetDifficultyValue(this.difficultyIndex);
+            this.defaultImage = this.GetImage(this.defaultImageIndex);
+            this._currentImageIndex = this.defaultImageIndex;
+            this._currentImage = this.defaultImage;
+            this._puzzleCardsList = this.Image2Collection(this._currentImage);
         }
-        /*
-        private BitmapSource _image00 = new BitmapImage(new Uri("/Images/Rafael2.jpg", UriKind.Relative));
-        public BitmapSource Image00
+
+        private BitmapImage _currentImage;
+        public BitmapImage CurrentImage
         {
-            get { return this._image00; }
-            set
-            {
-                if (this._image00 != value)
-                {
-                    this._image00 = value;
-                    RaisePropertyChanged("Image00");
-                }
-            }
+            get { return this._currentImage; }
+            set { this._currentImage = value; }
         }
-        */
-        private BitmapSource _image01 = new BitmapImage();
-        public BitmapSource Image01
+
+        private bool _canNewGameExecute = true;
+        public bool CanNewGameExecute
         {
-            get { return this._image01; }
-            set
+            get { return this._canNewGameExecute; }
+            set 
             {
-                if (this._image01 != value)
+                if (this._canNewGameExecute != value)
                 {
-                    this._image01 = value;
-                    RaisePropertyChanged("Image01");
-                    //Console.WriteLine("///////////////////////////////////////////");
+                    this._canNewGameExecute = value;
+                    RaisePropertyChanged("CanNewGameExecute");
                 }
             }
         }
 
-        private ImageSplitter _imageSplit;
-        public ImageSplitter ImageSplit
+        private bool _gameStarted = false;
+        public bool GameStarted
         {
-            get { return this._imageSplit; }
-            set { this._imageSplit = value; }
+            get { return this._gameStarted; }
+            set
+            {
+                if (this._gameStarted != value)
+                {
+                    this._gameStarted = value;
+                    RaisePropertyChanged("GameStarted");
+                }
+            }
+        }
+
+        private bool _gamePaused = false;
+        public bool GamePaused
+        {
+            get { return this._gamePaused; }
+            set 
+            {
+                if (this._gamePaused != value)
+                {
+                    this._gamePaused = value;
+                    RaisePropertyChanged("GamePaused");
+                }
+            }
         }
 
         private double _actualCanvasWidth = 100;
         public double ActualCanvasWidth
         {
-            get
-            {
-                return this._actualCanvasWidth;    
-            }
+            get { return this._actualCanvasWidth; }
             set
             {
                 if (this._actualCanvasWidth != value)
@@ -107,7 +125,20 @@ namespace _15Puzzle.ViewModels
                 {
                     this._actualCanvasHeight = value;
                     RaisePropertyChanged("ActualCanvasHeight");
-                    Console.WriteLine("ActualCanvasHeight" + this._actualCanvasHeight);
+                }
+            }
+        }
+
+        private string _shufflingLabel = " ";
+        public string ShufflingLabel
+        {
+            get { return this._shufflingLabel; }
+            set 
+            {
+                if (this._shufflingLabel != value)
+                {
+                    this._shufflingLabel = value;
+                    RaisePropertyChanged("ShufflingLabel");
                 }
             }
         }
@@ -126,149 +157,124 @@ namespace _15Puzzle.ViewModels
             }
         }
 
-        private ObservableCollection<PuzzleImage> _puzzleCardsList = new ObservableCollection<PuzzleImage>(); // BitmapSource
+        private ObservableCollection<PuzzleImage> _puzzleCardsList = new ObservableCollection<PuzzleImage>(); 
         public ObservableCollection<PuzzleImage> PuzzleCardsList
         {
-            get
-            {
-                //this._puzzleCardsList.Add(new PuzzleImage(Image00, 50));
-                /*
-                this._puzzleCardsList.Add(new PuzzleImage() 
-                            { 
-                                Image = Image00, 
-                                CanvasWidth = this._actualCanvasWidth, 
-                                CanvasHeight = this._actualCanvasHeight,
-                                ImageIndex = 0
-                            });*/
-                return this._puzzleCardsList;
-            }
+            get { return this._puzzleCardsList; }
             set 
             {
-                if (this._puzzleCardsList != value)
+                if (this._puzzleCardsList != value )
                 {
                     this._puzzleCardsList = value;
-                    Console.WriteLine("///////////Pocet prvkov" + _puzzleCardsList.Count);
                     RaisePropertyChanged("PuzzleCardsList");
+                    if (this.IsPuzzleSolved(this._puzzleCardsList) && this.GameStarted)
+                    {
+                        this.GameStarted = false;
+                        this.TimerStopImpl();
+                        MessageBox.Show("Congratulations :) ! The Puzzle is solved. Your time is " + this.Time, 
+                            "Solved", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
                 }        
             }
         }
 
-        private void Image2Collection(BitmapImage image)
+        private ObservableCollection<string> _listOfImages = new ObservableCollection<string>(Enum.GetNames(typeof(Images)));
+        public ObservableCollection<string> ListOfImages
         {
+            get { return this._listOfImages; }
+        }
+
+        private int _currentImageIndex;
+        public int CurrentImageIndex
+        {
+            get { return this._currentImageIndex; }
+            set 
             {
-                ImageSplitter imgSplit;
-                List<BitmapSource> images = new List<BitmapSource>();
-
-                Console.WriteLine("ShowDialog ActualCanvasHeight" + this._actualCanvasHeight);
-
-
-                try
+                if (this._currentImageIndex != value)
                 {
-                    //imgSplit = new ImageSplitter(new Uri(ofd.FileName, UriKind.Absolute));
-                    imgSplit = new ImageSplitter(this.aux);
-                    images = imgSplit.SplitImage(4, 4);
+                    this.GameStarted = false;
+                    this.GamePaused = false;
+                    this.TimerReset();
+                    this.ShufflingLabel = " ";
+                    this._currentImageIndex = value;
+                    this.CurrentImage = this.GetImage(this._currentImageIndex);
+                    this.PuzzleCardsList = this.Image2Collection(this.CurrentImage);
+                    RaisePropertyChanged("CurrentImageIndex");
                 }
-                /*catch (ArgumentException ex1)
-                {
-                    MessageBox.Show(ex1.Source);
-                }
-                catch (UriFormatException ex2)
-                {
-                    MessageBox.Show(ex2.Source);
-                }
-                catch (NotSupportedException ex3)
-                {
-                    MessageBox.Show(ex3.Source);
-                }*/
-                catch (NotSquareImageSizeException)
-                {
-                    MessageBox.Show("Image does not have square size!");
-                }
-
-                if (images.Any())
-                {
-                    int i = 0;
-                    images.ForEach(e =>
-                    {
-                        if (i < 15)
-                        {
-                            this._puzzleCardsList.Add(new PuzzleImage()
-                            {
-                                Image = e,
-
-                                CanvasWidth = this._actualCanvasWidth,
-                                CanvasHeight = this._actualCanvasHeight,
-                                ImageIndex = i,
-                                IsGap = false,
-                            });
-                            i++;
-                        }
-                        else
-                        {
-                            /*
-                             * BitmapSource transparentImage = BitmapImage.Create(1, 1, 96, 96, PixelFormats.Bgra32, 
-                                                                               null, new byte[] { 0, 0, 0, 0 }, 4);
-                            
-                             * */
-
-                            int rawStride = (80 * PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
-                            var rawImage = new byte[rawStride * 80];
-
-                            BitmapSource transparentImage = BitmapSource.Create(80, 80, 96, 96, PixelFormats.Bgra32,
-                                                                               null, rawImage, rawStride);
-                            this.PuzzleCardsList.Add(new PuzzleImage()
-                            {
-                                Image = transparentImage,
-                                CanvasWidth = this._actualCanvasWidth,
-                                CanvasHeight = this._actualCanvasHeight,
-                                ImageIndex = i,
-                                IsGap = true
-                            });
-                        }
-
-
-
-                        Console.WriteLine("Canvas Width = {0}", this._actualCanvasWidth);
-
-                    });
-
-                    this.PuzzleCardsList.Last().IsGap = true;
-
-                    Console.WriteLine("Pure Load data");
-
-                    int j = 0;
-                    foreach (var item in this._puzzleCardsList)
-                    {
-                        //Console.WriteLine("X_CanvasPosition = {0} Y_CanvasPosition = {1} index = {2} Canvas Width = {3} IsGap = {4} Real ImageIndex ={5} ", item.X_CanvasPosition, item.Y_CanvasPosition, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString(), j);
-                        Console.WriteLine("ColumnIndex = {0} RowIndex = {1} index = {2} Canvas Width = {3} IsGap = {4} Real ImageIndex ={5} ", item.ColumnIndex, item.RowIndex, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString(), j++);
-
-                    }
-
-                    //this.SwapItems();
-
-                    /*
-                    foreach (var item in this._puzzleCardsList)
-                    {
-                        Console.WriteLine("X_CanvasPosition = {0} Y_CanvasPosition = {1} index = {2} Canvas Width = {3} IsGap = {4}", item.X_CanvasPosition, item.Y_CanvasPosition, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString());
-                    }
-                    */
-                    //this.PuzzleCardsList.Add(new PuzzleImage(images[4], 10));
-                    //this.PuzzleCardsList.Add(new PuzzleImage() { Image = images[4], X = 100, CanvasWidth = this._actualCanvasWidth });
-                    //Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++");
-                    //Console.WriteLine("_PuzzleCardsList" + this._puzzleCardsList.Count);
-                    //Console.WriteLine("this.puzzleWidth je 8888 " + this._actualCanvasWidth);
-                    //Console.WriteLine("PuzzleCardsList " + this.PuzzleCardsList.Count);
-                }
-
-
-
-                Console.WriteLine("ObservableCollection Size" + this._puzzleCardsList.Count);
-                //Console.WriteLine("FileName " + ofd.FileName);
             }
         }
 
-        private IEnumerable<PuzzleImage> list;
+        private void LoadRegistry()
+        {
+            RegistryKey key = Registry.CurrentUser.CreateSubKey
+                ("Software\\FIMU\\15Puzzle");
 
+            this.difficultyIndex = (int)key.GetValue("DefaultDifficulty", 0);
+            this.defaultImageIndex = (int)key.GetValue("DefaultImage", 0);
+
+            key.Close();
+        }
+
+        public void SaveRegistry()
+        {
+            RegistryKey key = Registry.CurrentUser.OpenSubKey
+                ("Software\\FIMU\\15Puzzle", true);
+
+            key.SetValue("DefaultDifficulty", this.difficultyIndex);
+            key.SetValue("DefaultImage", this.defaultImageIndex);
+
+            key.Close();
+        }
+
+        private ObservableCollection<PuzzleImage> Image2Collection(BitmapImage image)
+        { 
+            ImageSplitter imageSplitter;
+            List<BitmapSource> images = new List<BitmapSource>();
+            ObservableCollection<PuzzleImage> puzzleImagesList = new ObservableCollection<PuzzleImage>();
+
+            imageSplitter = new ImageSplitter(image);
+            images = imageSplitter.SplitImage(4, 4);
+                
+            if (images.Any())
+            {
+                int i = 0;
+                images.ForEach(e =>
+                {
+                    if (i < 15)
+                    {
+                        puzzleImagesList.Add(new PuzzleImage()
+                        {
+                            Image = e,
+                            CanvasWidth = this._actualCanvasWidth,
+                            CanvasHeight = this._actualCanvasHeight,
+                            ImageIndex = i,
+                            IsGap = false,
+                        });
+                        i++;
+                    }
+                    else
+                    {
+                        int rawStride = (80 * PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
+                        var rawImage = new byte[rawStride * 80];
+
+                        BitmapSource transparentImage = BitmapSource.Create(80, 80, 96, 96, PixelFormats.Bgra32,
+                                                                            null, rawImage, rawStride);
+                        puzzleImagesList.Add(new PuzzleImage()
+                        {
+                            Image = transparentImage,
+                            CanvasWidth = this._actualCanvasWidth,
+                            CanvasHeight = this._actualCanvasHeight,
+                            ImageIndex = i,
+                            IsGap = true
+                        });
+                    }
+                });
+
+                puzzleImagesList.Last().IsGap = true;
+            }
+
+            return puzzleImagesList;
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -284,7 +290,7 @@ namespace _15Puzzle.ViewModels
         {
             get
             {
-                return new RelayCommand(() => this.OpenFile());
+                return new RelayCommand(() => this.OpenFile(), () => this.CanNewGameExecute);
             }
         }
 
@@ -300,22 +306,14 @@ namespace _15Puzzle.ViewModels
                          "PNG (*.png)|*.png"
             };
 
-
             if (ofd.ShowDialog() == true)
             {
-                ImageSplitter imgSplit;
-                List<BitmapSource> images = new List<BitmapSource>();
-
-                Console.WriteLine("ShowDialog ActualCanvasHeight" + this._actualCanvasHeight);
-                
-
                 try
                 {
-                    //imgSplit = new ImageSplitter(new Uri(ofd.FileName, UriKind.Absolute));
-                    imgSplit = new ImageSplitter(this.aux);
-                    images = imgSplit.SplitImage(4, 4);
+                    BitmapImage loadImage = new BitmapImage(new Uri(ofd.FileName, UriKind.Absolute));
+                    this.PuzzleCardsList = this.Image2Collection(loadImage);
                 }
-                /*catch (ArgumentException ex1)
+                catch (ArgumentException ex1)
                 {
                     MessageBox.Show(ex1.Source);
                 }
@@ -326,91 +324,11 @@ namespace _15Puzzle.ViewModels
                 catch (NotSupportedException ex3)
                 {
                     MessageBox.Show(ex3.Source);
-                }*/
+                }
                 catch (NotSquareImageSizeException)
                 {
                     MessageBox.Show("Image does not have square size!");
                 }
-
-                if (images.Any())
-                {
-                    int i = 0;
-                    images.ForEach(e =>
-                    {
-                        if (i < 15)
-                        {
-                            this._puzzleCardsList.Add(new PuzzleImage()
-                                {
-                                    Image = e,
-                                    
-                                    CanvasWidth = this._actualCanvasWidth,
-                                    CanvasHeight = this._actualCanvasHeight,
-                                    ImageIndex = i,
-                                    IsGap = false,
-                                });
-                            i++;
-                        }
-                        else
-                        {
-                            /*
-                             * BitmapSource transparentImage = BitmapImage.Create(1, 1, 96, 96, PixelFormats.Bgra32, 
-                                                                               null, new byte[] { 0, 0, 0, 0 }, 4);
-                            
-                             * */
-
-                            int rawStride = (80 * PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
-                            var rawImage = new byte[rawStride * 80];
-
-                            BitmapSource transparentImage = BitmapSource.Create(80, 80, 96, 96, PixelFormats.Bgra32, 
-                                                                               null, rawImage, rawStride);
-                            this.PuzzleCardsList.Add(new PuzzleImage()
-                                {
-                                    Image = transparentImage,
-                                    CanvasWidth = this._actualCanvasWidth,
-                                    CanvasHeight = this._actualCanvasHeight,
-                                    ImageIndex = i,
-                                    IsGap = true
-                                });
-                        }
-                        
-
-
-                        Console.WriteLine("Canvas Width = {0}", this._actualCanvasWidth);
-                        
-                    });
-
-                    this.PuzzleCardsList.Last().IsGap = true;
-
-                    Console.WriteLine("Pure Load data");
-                    
-                    int j = 0;
-                    foreach (var item in this._puzzleCardsList)
-                    {
-                        //Console.WriteLine("X_CanvasPosition = {0} Y_CanvasPosition = {1} index = {2} Canvas Width = {3} IsGap = {4} Real ImageIndex ={5} ", item.X_CanvasPosition, item.Y_CanvasPosition, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString(), j);
-                        Console.WriteLine("ColumnIndex = {0} RowIndex = {1} index = {2} Canvas Width = {3} IsGap = {4} Real ImageIndex ={5} ", item.ColumnIndex, item.RowIndex, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString(), j++);
-                    
-                    }
-                    
-                    //this.SwapItems();
-
-                    /*
-                    foreach (var item in this._puzzleCardsList)
-                    {
-                        Console.WriteLine("X_CanvasPosition = {0} Y_CanvasPosition = {1} index = {2} Canvas Width = {3} IsGap = {4}", item.X_CanvasPosition, item.Y_CanvasPosition, item.ImageIndex, item.CanvasWidth, item.IsGap.ToString());
-                    }
-                    */
-                    //this.PuzzleCardsList.Add(new PuzzleImage(images[4], 10));
-                    //this.PuzzleCardsList.Add(new PuzzleImage() { Image = images[4], X = 100, CanvasWidth = this._actualCanvasWidth });
-                    //Console.WriteLine("+++++++++++++++++++++++++++++++++++++++++");
-                    //Console.WriteLine("_PuzzleCardsList" + this._puzzleCardsList.Count);
-                    //Console.WriteLine("this.puzzleWidth je 8888 " + this._actualCanvasWidth);
-                    //Console.WriteLine("PuzzleCardsList " + this.PuzzleCardsList.Count);
-                }
-
-                
-
-                Console.WriteLine("ObservableCollection Size" + this._puzzleCardsList.Count);
-                Console.WriteLine("FileName " + ofd.FileName);
             }
         }
 
@@ -422,69 +340,45 @@ namespace _15Puzzle.ViewModels
             }
         }
 
-        public ICommand Swap
-        {
-            get 
-            {
-                return new RelayCommand(() => this.SwapItems());
-            }
-        }
-
-        private void SwapItems()
-        {
-            Console.WriteLine("SwapImageIndex index 11 is {0} X_CanvasPosition = {1} Y_CanvasPosition = {2} ", this._puzzleCardsList[11].ImageIndex, this.PuzzleCardsList[11].X_CanvasPosition, this.PuzzleCardsList[11].Y_CanvasPosition);
-            Console.WriteLine("SwapImageIndex index 15 is {0} X_CanvasPosition = {1} Y_CanvasPosition = {2} ", this._puzzleCardsList[15].ImageIndex, this.PuzzleCardsList[15].X_CanvasPosition, this.PuzzleCardsList[15].Y_CanvasPosition);
-            
-            int aux = this._puzzleCardsList[11].ImageIndex;
-            this._puzzleCardsList[11].ImageIndex = 15;
-            this._puzzleCardsList[15].ImageIndex = aux;
-
-            PuzzleImage im = this._puzzleCardsList[11];
-            this._puzzleCardsList.Remove(im);
-            this._puzzleCardsList.Add(im);
-
-            Console.WriteLine("SwapImageIndex index 11 is {0} X_CanvasPosition = {1} Y_CanvasPosition = {2} ", this._puzzleCardsList[11].ImageIndex, this.PuzzleCardsList[11].X_CanvasPosition, this.PuzzleCardsList[11].Y_CanvasPosition);
-            Console.WriteLine("SwapImageIndex index 15 is {0} X_CanvasPosition = {1} Y_CanvasPosition = {2} ", this._puzzleCardsList[15].ImageIndex, this.PuzzleCardsList[15].X_CanvasPosition, this.PuzzleCardsList[15].Y_CanvasPosition);
-
-            //this.PuzzleCardsList.CollectionChanged += this.UpdatePuzzleCardList;
-        }
-
-        public void UpdatePuzzleCardList(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            var list = sender as ObservableCollection<PuzzleImage>;
-        }
-        /*
-        public ICommand SuffleCommand
-        {
-            get
-            {
-                //return new RelayCommand(() => this.SufflePuzzle());
-                return new RelayCommand(() => { threadShuffle = new Thread(SufflePuzzle); threadShuffle.IsBackground = true; threadShuffle.Start(); });
-            }
-        }*/
-        
         private void SufflePuzzle()
         {
-            this.canNewGameExecute = false;
+            this.CanNewGameExecute = false;
             changeCanExecuteDelegat changeCanExecuteDel = ChangeCanNewGameExecute;
+
+            this.TimerReset();
+            this.ShufflingLabel = "Shuffling Puzzle...";
+
             
             IList<PuzzleImage> listTmp = this.PuzzleCardsList;
-            IList<PuzzleImage> listTmpShuffle = this.puzzleManager.Shuffle(listTmp);
+            IList<PuzzleImage> listTmpShuffle = this.puzzleManager.Shuffle(listTmp, this.difficulty);
+            this.GameStarted = true;
             this.PuzzleCardsList = new ObservableCollection<PuzzleImage>(listTmpShuffle);
 
-            this.timer.Interval = new TimeSpan(0, 0, 1);
-            this.timer.Tick += new EventHandler(Each_Tick);
-            this.timer.Start();
+            this.TimerStart();
 
-            this.canNewGameExecute = false;
-            
+            this.CanNewGameExecute = true;
+            this.ShufflingLabel = " ";   
+        }
+
+        private bool IsPuzzleSolved(ObservableCollection<PuzzleImage> puzzleImagesList)
+        {
+            int auxIndex = 0;
+            foreach (var item in puzzleImagesList)
+            {
+                if (item.ImageIndex != auxIndex)
+                {
+                    return false;
+                }
+                auxIndex++;
+            }
+            return true;
         }
 
         public ICommand StartNewGameCommand
         {
             get 
             {
-                return new RelayCommand(() => this.StartNewGameImpl(), () => this.canNewGameExecute);   
+                return new RelayCommand(() => this.StartNewGameImpl(), () => this.CanNewGameExecute);   
             }
         }
 
@@ -493,26 +387,32 @@ namespace _15Puzzle.ViewModels
             threadShuffle = new Thread(SufflePuzzle);
             threadShuffle.IsBackground = true;
             threadShuffle.Start();
-            /*
+        }
+
+        public void TimerStart()
+        {
             this.timer.Interval = new TimeSpan(0, 0, 1);
             this.timer.Tick += new EventHandler(Each_Tick);
             this.timer.Start();
-            */
         }
-
 
         private void ChangeCanNewGameExecute()
         {
-            this.canNewGameExecute = !this.canNewGameExecute;
+            this.CanNewGameExecute = !this.CanNewGameExecute;
         }
 
         public void Each_Tick(object o, EventArgs sender)
         {
             this.timeElapsed++;
-            //TimeSpan t = new TimeSpan(this.timeElapsed);
-            TimeSpan t2 = TimeSpan.FromSeconds(this.timeElapsed);
-            //this.Time = String.Format(" : {0:00}", this.timeElapsed.ToString());
-            this.Time = String.Format("{0:00}:{1:00}", t2.Minutes, t2.Seconds);
+            TimeSpan t = TimeSpan.FromSeconds(this.timeElapsed);
+            this.Time = String.Format("{0:00}:{1:00}", t.Minutes, t.Seconds);
+        }
+
+        public void TimerReset()
+        {
+            this.timeElapsed = 0;
+            this.Time = String.Format("  :  ");
+            this.timer.Tick -= new EventHandler(Each_Tick);
         }
 
         public ICommand TimerContinueCommand
@@ -525,6 +425,9 @@ namespace _15Puzzle.ViewModels
 
         public void TimerContinueImpl()
         {
+            this.GamePaused = false;
+            this.GameStarted = true;
+            this.ShufflingLabel = " ";
             this.timer.Start();
         }
 
@@ -539,33 +442,82 @@ namespace _15Puzzle.ViewModels
         public void TimerStopImpl()
         {
             this.timer.Stop();
+            this.GamePaused = true;
+            this.GameStarted = false;
+            this.ShufflingLabel = "Game Paused";
         }
 
-        private void Parse()
-        {
-
-        }
 
         public ICommand OptionsDialogCommand
         {
             get
             {
-                return new RelayCommand(() => this.OptionsDialogImpl());
+                return new RelayCommand(() => this.OptionsDialogImpl(), () => this.CanNewGameExecute);
             }
         }
 
-        
+        private int GetDifficultyValue(int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return 20;
+                case 1:
+                    return 50;
+                case 2:
+                    return 100;
+                case 3:
+                    return 200;
+            }
+            return 50;
+        }
+
+        private BitmapImage GetImage(int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return this.imageWood;
+                case 1:
+                    return this.imageGrey;
+                case 2:
+                    return this.imagePaint;
+                case 3:
+                    return this.imageRafael;
+            }
+            return this.imageWood;
+        }
 
         private void OptionsDialogImpl()
         {
-            OptionsDialog od = new OptionsDialog();
+            OptionsDialog optionsDialog = new OptionsDialog() {SelectedDifficulty = this.difficultyIndex, SelectedImage = this.defaultImageIndex }; 
+             
+            this.TimerStopImpl();
 
-            if (od.ShowDialog() == true)
+            if (optionsDialog.ShowDialog() == true)
             {
-                
+                this.difficultyIndex = optionsDialog.SelectedDifficulty;
+                this.difficulty = this.GetDifficultyValue(this.difficultyIndex);
+                this.defaultImageIndex = optionsDialog.SelectedImage;
+                this.defaultImage = this.GetImage(this.defaultImageIndex);
+            }
+
+            this.TimerContinueImpl();
+        }
+
+        public ICommand AboutDialogCommand
+        {
+            get
+            {
+                return new RelayCommand(() => this.AboutDialogImpl());
             }
         }
 
+        private void AboutDialogImpl()
+        {
+            About about = new About();
 
+            about.ShowDialog();
+        }
     }
 }

@@ -19,26 +19,23 @@ namespace _15Puzzle
     /// </summary>
     public partial class OptionsDialog : Window
     {
-        private List<int> _difficultyList;
-        public List<int> DifficultyList
+        public int SelectedDifficulty
         {
-            get { return this._difficultyList; }
-            set 
-            { 
-                this._difficultyList = value;
-                this.comboBoxDifficulty.DataContext = this.DifficultyList;
-            }
+            get { return (int) this.difficultyComboBox.SelectedIndex; }
+            set { this.difficultyComboBox.SelectedIndex = value; }
         }
-
-        public int SelecteDifficulty
+       
+        public int SelectedImage
         {
-            get { return (int)this.comboBoxDifficulty.SelectedItem; }
+            get { return (int) this.imagesComboBox.SelectedIndex; }
+            set { this.imagesComboBox.SelectedIndex = value; }
         }
-
 
         public OptionsDialog()
         {
             InitializeComponent();
+            this.difficultyComboBox.ItemsSource = Enum.GetNames(typeof(Difficulty));
+            this.imagesComboBox.ItemsSource = Enum.GetNames(typeof(Images));
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
@@ -50,6 +47,5 @@ namespace _15Puzzle
         {
             this.DialogResult = false;
         }
-
     }
 }

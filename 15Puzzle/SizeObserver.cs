@@ -9,6 +9,7 @@ namespace _15Puzzle
 {
     public static class SizeObserver
     {
+        //copied from http://stackoverflow.com/questions/1083224/pushing-read-only-gui-properties-back-into-viewmodel
 
         public static readonly DependencyProperty ObserveProperty = DependencyProperty.RegisterAttached(
             "Observe",
@@ -70,7 +71,6 @@ namespace _15Puzzle
             {
                 frameworkElement.SizeChanged += OnFrameworkElementSizeChanged;
                 UpdateObservedSizesForFrameworkElement(frameworkElement);
-                //Console.WriteLine("---------------------------------");
             }
             else
             {

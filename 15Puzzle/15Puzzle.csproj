@@ -82,9 +82,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="EnumTypes.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="ImageSplitter.cs" />
-    <Compile Include="Matrix.cs" />
     <Compile Include="OptionsDialog.xaml.cs">
       <DependentUpon>OptionsDialog.xaml</DependentUpon>
     </Compile>
@@ -92,8 +95,11 @@
     <Compile Include="PuzzleManager.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="SizeObserver.cs" />
-    <Compile Include="Solver.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -128,6 +134,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="15Puzzle_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
@@ -140,13 +147,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Rafael2.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Grey.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Wood.jpg" />
+    <Resource Include="Images\Rafael.jpg" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -164,6 +165,33 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Wood.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Grey.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Paint.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\PlayIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\PauseIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\PlayGamesIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\SettingsIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\InformationIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,28 +3,30 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:_15Puzzle.ViewModels"
         xmlns:local="clr-namespace:_15Puzzle"
-        Title="15Puzzle" Height="433" Width="525" MinHeight="433" ResizeMode="NoResize" KeyDown="Window_KeyDown">
+        Title="15Puzzle" Height="433" Width="525" MinHeight="433" ResizeMode="NoResize" KeyDown="Window_KeyDown" Closing="Window_Closing" Icon="/Images/PlayGamesIcon.png">
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
     <Window.InputBindings>
         <KeyBinding Command="{Binding ExitCommand, Mode=OneWay}" Gesture="CTRL+X" />
         <KeyBinding Command="{Binding OpenCommand, Mode=OneWay}" Gesture="CTRL+O" />
-        <KeyBinding Command="{Binding ShuffleCommand}" Gesture="CTRL+T" />
         <KeyBinding Command="{Binding TimerContinueCommand}" Gesture="CTRL+C" />
         <KeyBinding Command="{Binding TimerStopCommand}" Gesture="CTRL+P"/>
+        <KeyBinding Command="{Binding StartNewGameCommand}" Gesture="CTRL+N"/>
     </Window.InputBindings>
     <Grid>
         <Menu Height="20" VerticalAlignment="Top">
             <MenuItem Header="_File" Focusable="False">
-                <MenuItem Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" />
+                <MenuItem Name="openFileButton" Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" IsEnabled="{Binding CanNewGameExecute}" InputGestureText="CTRL+O" />
+                <MenuItem Name="newGameMenuButton" Header="_New Game" Command="{Binding StartNewGameCommand}" IsEnabled="{Binding CanNewGameExecute}" InputGestureText="CTRL+N" />
                 <Separator />
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand, Mode=OneWay}"  />
+                <MenuItem Header="E_xit" Command="{Binding ExitCommand, Mode=OneWay}" InputGestureText="CTRL+X" />
             </MenuItem>
-            <MenuItem Header="_Options" Focusable="False" Command="{Binding OptionsDialogCommand, Mode=OneWay}" />
+            <MenuItem Name="optionsButton" Header="_Options" Focusable="False" >
+                <MenuItem Name="settingsButton" Header="_Settings..." Command="{Binding OptionsDialogCommand, Mode=OneWay}" IsEnabled="{Binding CanNewGameExecute}" />
+            </MenuItem>
             <MenuItem Header="_Help" Focusable="False">
-                <MenuItem Header="User _manual..."/>
-                <MenuItem Header="_About 15 Puzzle..."/>
+                <MenuItem Header="_About 15 Puzzle..." Command="{Binding AboutDialogCommand}" />
             </MenuItem>
         </Menu>
 
@@ -103,8 +105,12 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" Focusable="False" />
-                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" Focusable="False" />
+                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0"  Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" IsEnabled="{Binding GameStarted}" Focusable="False" >
+                            <Image Source="/Images/PauseIcon.png"/>
+                        </Button>
+                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" IsEnabled="{Binding GamePaused}" Focusable="False" >
+                            <Image Source="/Images/PlayIcon.png"/>
+                        </Button>
                     </Grid>
                     
                     <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Text="{Binding Path=Time, Mode=TwoWay}" >
@@ -131,16 +137,13 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Label Name="chooseLabel" Grid.Column="1" Grid.Row="0" Content="Choose a picture" HorizontalAlignment="Center"  />
-                        <ComboBox Name="comboImage" Grid.Column="1" Grid.Row="1" 
-                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" />    
+                        <ComboBox Name="imagesComboBox" Grid.Column="1" Grid.Row="1" 
+                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" ItemsSource="{Binding ListOfImages}" SelectedIndex="{Binding CurrentImageIndex}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="{Binding CanNewGameExecute}" />    
                     </Grid>
                     
-                    <Button Name="btnStartGame" Content="New game" Grid.Column="1" Grid.Row="1" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80" Command="{Binding StartNewGameCommand}" Focusable="False" />
-                    <Button Name="btnShuffle" Content="Shuffle" Grid.Column="1" Grid.Row="2" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Command="{Binding SuffleCommand}" Focusable="False"/>
+                    <Button Name="startGameButton" Content="New game" Grid.Column="1" Grid.Row="1" Margin="5"
+                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Focusable="False" Command="{Binding StartNewGameCommand}" IsEnabled="{Binding CanNewGameExecute}" />
                 </Grid>
-
             </Grid>
         </Grid>
         
@@ -148,8 +151,7 @@
             <StatusBar.Background>
                 <SolidColorBrush Color="LightGray"/>
             </StatusBar.Background>
-            <Label Name="Shuffling" Content="" />
-            <ProgressBar Height="10" Width="100"/>
+            <TextBlock Name="ShufflingTextBlock" Text="{Binding Path=ShufflingLabel, Mode=TwoWay}" />
         </StatusBar>
     </Grid>
    

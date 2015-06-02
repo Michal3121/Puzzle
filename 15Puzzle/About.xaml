@@ -1,0 +1,27 @@
+﻿<Window x:Class="_15Puzzle.About"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About" Height="300" Width="300" ResizeMode="NoResize" Icon="/Images/InformationIcon.png">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Text="15Puzzle" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Grid.Row="1" Text="Version: 1.0" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Text="© 2015 : Michal Čaba" VerticalAlignment="Center" />
+        <Button Grid.Column="3" Grid.Row="3" Content="OK" Margin="10,20" Click="Button_Click"/>
+        
+            
+        
+    </Grid>
+</Window>

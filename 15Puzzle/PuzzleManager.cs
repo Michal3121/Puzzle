@@ -10,8 +10,6 @@ namespace _15Puzzle
 {
     class PuzzleManager
     {
-        private const int NUMBER_OF_SHUFFLING_CYCLES = 50;
-
         public IList<PuzzleImage> Swap(PuzzleImage puzzleClicked, IList<PuzzleImage> listOfPuzzle)
         {
             PuzzleImage gapImage = this.FindGapPuzzle(listOfPuzzle);
@@ -95,18 +93,16 @@ namespace _15Puzzle
             return listOfPuzzle;
         }
 
-        public IList<PuzzleImage> Shuffle(IList<PuzzleImage> listOfPuzzle)
+        public IList<PuzzleImage> Shuffle(IList<PuzzleImage> listOfPuzzle, int numberOfSufflingCycles)
         {
             IList<PuzzleImage> listOfPuzzleTmp = listOfPuzzle;
-            //IList<PuzzleImage> listOfPuzzleTmp = new List<PuzzleImage>(listOfPuzzle);
             Random randNum = new Random();
 
-            for (int i = 0; i < NUMBER_OF_SHUFFLING_CYCLES; i++ )
+            for (int i = 0; i < numberOfSufflingCycles; i++)
             {
                 PuzzleImage gapImage = this.FindGapPuzzle(listOfPuzzleTmp);
-                int random = randNum.Next(0, 4);
-                Console.WriteLine("rand " + random);
-                switch (random)
+                
+                switch (randNum.Next(0, 4))
                 {
                     case 0:
                         if (this.HasGapLowerNeighbour(gapImage, listOfPuzzle))

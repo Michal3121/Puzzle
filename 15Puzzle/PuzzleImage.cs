@@ -21,10 +21,7 @@ namespace _15Puzzle
         private int _imageIndex;
         public int ImageIndex
         {
-            get 
-            { 
-                return this._imageIndex;
-            }
+            get { return this._imageIndex; }
             set 
             {
                 if (this._imageIndex != value)
@@ -34,8 +31,7 @@ namespace _15Puzzle
                     this._rowIndex = (this.ImageIndex - this._columnIndex) / COLUMNS_COUNT;
                     this.UpdateY();
                     this.UpdateX();
-                    Console.WriteLine(" index = {0} X_CanvasPosition = {1} Y_CanvasPosition = {2} ", this.ImageIndex, this.X_CanvasPosition, this.Y_CanvasPosition);
-                    this.NotifyPropertyChanged("ImageIndex");
+                    this.NotifyPropertyChanged("CurrentImageIndex");
                 }
             }
         }
@@ -52,7 +48,6 @@ namespace _15Puzzle
             get { return this._rowIndex; }
         }
 
-
         private double _canvasWidth;
         public double CanvasWidth
         {
@@ -67,52 +62,22 @@ namespace _15Puzzle
         public double CanvasHeight
         {
             get { return this._canvasHeight; }
-            set { 
-                
+            set 
+            { 
                 this._canvasHeight = value; 
-                //NotifyPropertyChanged("CanvasHeight");
             }
         }
 
         private double _x_CanvasPosition;
         public double X_CanvasPosition 
         {
-            get
-            {
-                /*
-                int columnIndex = this.ImageIndex % COLUMNS_COUNT;
-                double imageWidth = this._canvasWidth / COLUMNS_COUNT;
-
-                this.x = (imageWidth) * columnIndex;
-                */
-                
-
-                return this._x_CanvasPosition; 
-            }
+            get { return this._x_CanvasPosition; }
         }
 
         private double _y_CanvasPosition = 0;
         public double Y_CanvasPosition 
         {
-            get 
-            {
-                /*
-                int columnIndex = this.ImageIndex % COLUMNS_COUNT;
-                int rowIndex = (this.ImageIndex - columnIndex) / COLUMNS_COUNT;
-                //int rowIndex = this.ImageIndex % ROWS_COUNT;
-                double imageHeight = this._canvasHeight / ROWS_COUNT;
-                */
-                //Console.WriteLine("ImageIndex " + this.ImageIndex);
-                //Console.WriteLine("columnIndex " + columnIndex);
-                //Console.WriteLine("imageHeight " + imageHeight);
-                //Console.WriteLine("rowIndex " + rowIndex);
-                //Console.WriteLine("Vypocet Y " + (imageHeight) * rowIndex);
-
-                //this.y = (imageHeight) * rowIndex;
-                
-                return this._y_CanvasPosition; 
-            }
-            
+            get { return this._y_CanvasPosition; }
         }
 
         private void UpdateX()
@@ -127,16 +92,7 @@ namespace _15Puzzle
         {
             int columnIndex = this.ImageIndex % COLUMNS_COUNT;
             int rowIndex = (this.ImageIndex - columnIndex) / COLUMNS_COUNT;
-            //int rowIndex = this.ImageIndex % ROWS_COUNT;
             double imageHeight = this._canvasHeight / ROWS_COUNT;
-            /*            
-            Console.WriteLine("ImageIndex " + this.ImageIndex);
-            Console.WriteLine("columnIndex " + columnIndex);
-            Console.WriteLine("this.canvasHeight" + this._canvasHeight);
-            Console.WriteLine("imageHeight " + imageHeight);
-            Console.WriteLine("rowIndex " + rowIndex);
-            Console.WriteLine("Vypocet Y " + (imageHeight) * rowIndex);
-            */
             
             this._y_CanvasPosition = (imageHeight) * rowIndex + (rowIndex * SIZE_OF_BOUNDARY_LINE);
         }
@@ -165,8 +121,6 @@ namespace _15Puzzle
             if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-                Console.WriteLine("//////////////////////////////////");
-                Console.WriteLine("this._imageIndex " + this._imageIndex);
             }
         }
         

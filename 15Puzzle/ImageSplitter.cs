@@ -13,13 +13,11 @@ namespace _15Puzzle
         private BitmapImage bitmapImageTmp;
         private double imageWidth;
         private double imageHeight;
-        private Uri path;
 
         public ImageSplitter(BitmapImage image)
         {
             try
             {
-                //this.bitmapImageTmp = new BitmapImage(fileName);
                 this.bitmapImageTmp = image;
             }
             catch (NotSupportedException ex1)
@@ -28,18 +26,12 @@ namespace _15Puzzle
                     Console.WriteLine("Exception source: {0} TypeExcepion: {1}", ex1.Source, ex1.GetType().FullName);
                 throw new NotSupportedException(ex1.Source, ex1);
             }
-            /*catch (FileNotFoundException ex2)
-            {
-                if (ex2.Source != null)
-                    Console.WriteLine("Exception source: {0} TypeExcepion: {1}", ex2.Source, ex2.GetType().FullName);
-                throw new FileNotFoundException(ex2.Source, ex2);
-            }
             catch (Exception ex3)
             {
                 if (ex3.Source != null)
                     Console.WriteLine("Exception source: {0} TypeExcepion: {1}", ex3.Source, ex3.GetType().FullName);
                 throw new ArgumentNullException(ex3.Source, ex3);
-            }*/
+            }
 
             this.imageWidth = bitmapImageTmp.PixelWidth;
             this.imageHeight = bitmapImageTmp.PixelHeight;
@@ -72,9 +64,6 @@ namespace _15Puzzle
             int stride = (int)bitmapImage.PixelHeight * ((bitmapImage.Format.BitsPerPixel + 7) / 8);
             int[] pixelArray = new int[(int)this.imageHeight * stride];
 
-            Console.WriteLine("Stride " + stride);
-            Console.WriteLine("PixelArray Length " + pixelArray.Length);
-
             for (int startY = 0; startY < this.imageHeight; startY += chunkHeight)
             {
                 for (int startX = 0; startX < this.imageWidth; startX += chunkWidth)
@@ -92,7 +81,6 @@ namespace _15Puzzle
                     listOfImageChunks.Add(imageChunk);
                 }
             }
-            Console.WriteLine("Pocet " + listOfImageChunks.Count);
             return listOfImageChunks;
         }
 
@@ -107,7 +95,7 @@ namespace _15Puzzle
             BitmapImage imageRet = new BitmapImage();
 
             imageRet.BeginInit();
-            imageRet.UriSource = this.path;
+            imageRet.UriSource = this.bitmapImageTmp.UriSource;
             imageRet.DecodePixelWidth = (int)this.bitmapImageTmp.Width + widthDifference;
             imageRet.DecodePixelHeight = (int)this.bitmapImageTmp.Height + heightDifference;
             imageRet.EndInit();
