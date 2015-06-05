@@ -19,6 +19,15 @@ namespace _15Puzzle
         Wood = 0,
         Grey = 1,
         Paint = 2,
+        Rafael = 3,
+        Custom = 4
+    }
+
+    enum ImagesOptions
+    {
+        Wood = 0,
+        Grey = 1,
+        Paint = 2,
         Rafael = 3
     }
 }

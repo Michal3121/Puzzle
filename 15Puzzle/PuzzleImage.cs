@@ -102,17 +102,6 @@ namespace _15Puzzle
             get;
             set;
         }
-        
-        
-
-        
-
-        /*
-        public PuzzleImage(BitmapSource image, double x)
-        {
-            this.Image = image;
-            this.X = x;
-        }*/
 
         public event PropertyChangedEventHandler PropertyChanged;
 

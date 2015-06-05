@@ -80,5 +80,54 @@ namespace _15Puzzle
 
             viewModel.SaveRegistry();
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            About about = new About();
+            about.Owner = this;
+
+            about.ShowDialog();
+        }
+
+        private void optionsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var frameworkElement = (FrameworkElement)sender;
+            var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
+
+            OptionsDialog optionsDialog = new OptionsDialog() { SelectedDifficulty = viewModel.DifficultyIndex, SelectedImage = viewModel.DefaultImageIndex };
+            optionsDialog.Owner = this;
+
+            bool wasStarted = viewModel.GameStarted;
+            bool canContinue = viewModel.GameContinue;
+            viewModel.TimerStopImpl();
+            viewModel.GamePaused = false;
+            viewModel.GameContinue = false;
+
+            if (optionsDialog.ShowDialog() == true)
+            {
+                viewModel.DifficultyIndex = optionsDialog.SelectedDifficulty;
+                viewModel.Difficulty = viewModel.GetDifficultyValue(viewModel.DifficultyIndex);
+                viewModel.DefaultImageIndex = optionsDialog.SelectedImage;
+                viewModel.DefaultImage = viewModel.GetImage(viewModel.DefaultImageIndex);
+            }
+
+            viewModel.TimerContinueImpl();
+            viewModel.GameStarted = wasStarted;
+            if (wasStarted) viewModel.GamePaused = true;
+            if (!wasStarted) viewModel.GamePaused = false;
+            viewModel.GameContinue = false;
+            if (canContinue) viewModel.GamePaused = true;
+        }
+
+        private void imagesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var frameworkElement = (FrameworkElement)sender;
+            var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
+
+            if (this.imagesComboBox.SelectedIndex == 4)
+            {
+                viewModel.CurrentImageIndex = 4;
+            }
+        }
     }
 }

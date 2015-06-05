@@ -22,11 +22,11 @@
                 <Separator />
                 <MenuItem Header="E_xit" Command="{Binding ExitCommand, Mode=OneWay}" InputGestureText="CTRL+X" />
             </MenuItem>
-            <MenuItem Name="optionsButton" Header="_Options" Focusable="False" >
-                <MenuItem Name="settingsButton" Header="_Settings..." Command="{Binding OptionsDialogCommand, Mode=OneWay}" IsEnabled="{Binding CanNewGameExecute}" />
+            <MenuItem Name="optionsButton" Header="_Options" Focusable="False" Click="optionsButton_Click" >
+                <MenuItem Name="settingsButton" Header="_Settings..." IsEnabled="{Binding CanNewGameExecute}" />
             </MenuItem>
-            <MenuItem Header="_Help" Focusable="False">
-                <MenuItem Header="_About 15 Puzzle..." Command="{Binding AboutDialogCommand}" />
+            <MenuItem Header="_Help" Focusable="False" Click="MenuItem_Click">
+                <MenuItem Header="_About 15 Puzzle..." />
             </MenuItem>
         </Menu>
 
@@ -105,10 +105,10 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0"  Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" IsEnabled="{Binding GameStarted}" Focusable="False" >
+                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0"  Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" IsEnabled="{Binding GamePaused}" Focusable="False" >
                             <Image Source="/Images/PauseIcon.png"/>
                         </Button>
-                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" IsEnabled="{Binding GamePaused}" Focusable="False" >
+                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" IsEnabled="{Binding GameContinue}" Focusable="False" >
                             <Image Source="/Images/PlayIcon.png"/>
                         </Button>
                     </Grid>
@@ -138,7 +138,7 @@
                         </Grid.RowDefinitions>
                         <Label Name="chooseLabel" Grid.Column="1" Grid.Row="0" Content="Choose a picture" HorizontalAlignment="Center"  />
                         <ComboBox Name="imagesComboBox" Grid.Column="1" Grid.Row="1" 
-                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" ItemsSource="{Binding ListOfImages}" SelectedIndex="{Binding CurrentImageIndex}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="{Binding CanNewGameExecute}" />    
+                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" ItemsSource="{Binding ListOfImages}" SelectedIndex="{Binding CurrentImageIndex, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="{Binding CanNewGameExecute}" SelectionChanged="imagesComboBox_SelectionChanged" />    
                     </Grid>
                     
                     <Button Name="startGameButton" Content="New game" Grid.Column="1" Grid.Row="1" Margin="5"

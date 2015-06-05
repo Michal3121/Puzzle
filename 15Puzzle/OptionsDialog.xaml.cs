@@ -35,7 +35,7 @@ namespace _15Puzzle
         {
             InitializeComponent();
             this.difficultyComboBox.ItemsSource = Enum.GetNames(typeof(Difficulty));
-            this.imagesComboBox.ItemsSource = Enum.GetNames(typeof(Images));
+            this.imagesComboBox.ItemsSource = Enum.GetNames(typeof(ImagesOptions));
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)
