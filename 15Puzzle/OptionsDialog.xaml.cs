@@ -25,17 +25,17 @@ namespace _15Puzzle
             set { this.difficultyComboBox.SelectedIndex = value; }
         }
        
-        public int SelectedImage
+        public string SelectedImageName
         {
-            get { return (int) this.imagesComboBox.SelectedIndex; }
-            set { this.imagesComboBox.SelectedIndex = value; }
+            get { return (string)this.imagesComboBox.SelectedValue; }
+            set { this.imagesComboBox.SelectedValue = value; }
         }
 
-        public OptionsDialog()
+        public OptionsDialog(ViewModels.MainViewModel viewModel)
         {
             InitializeComponent();
             this.difficultyComboBox.ItemsSource = Enum.GetNames(typeof(Difficulty));
-            this.imagesComboBox.ItemsSource = Enum.GetNames(typeof(ImagesOptions));
+            this.imagesComboBox.ItemsSource = viewModel.LoadedImagesNamesForOptions;
         }
 
         private void okButton_Click(object sender, RoutedEventArgs e)

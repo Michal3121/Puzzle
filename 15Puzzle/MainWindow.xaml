@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:_15Puzzle.ViewModels"
         xmlns:local="clr-namespace:_15Puzzle"
-        Title="15Puzzle" Height="433" Width="525" MinHeight="433" ResizeMode="NoResize" KeyDown="Window_KeyDown" Closing="Window_Closing" Icon="/Images/PlayGamesIcon.png">
+        Title="15Puzzle" Height="433" Width="525" MinHeight="433" ResizeMode="NoResize" 
+        KeyDown="Window_KeyDown" Closing="Window_Closing" Icon="/Images/PlayGamesIcon.png">
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
@@ -15,12 +16,23 @@
         <KeyBinding Command="{Binding StartNewGameCommand}" Gesture="CTRL+N"/>
     </Window.InputBindings>
     <Grid>
+        <!--///////////////////////////  MenuStrip ///////////////////////////-->
         <Menu Height="20" VerticalAlignment="Top">
             <MenuItem Header="_File" Focusable="False">
-                <MenuItem Name="openFileButton" Header="_Open File..." Command="{Binding OpenCommand, Mode=OneWay}" IsEnabled="{Binding CanNewGameExecute}" InputGestureText="CTRL+O" />
-                <MenuItem Name="newGameMenuButton" Header="_New Game" Command="{Binding StartNewGameCommand}" IsEnabled="{Binding CanNewGameExecute}" InputGestureText="CTRL+N" />
+                <MenuItem Name="openFileButton" 
+                          Header="_Open File..." 
+                          Command="{Binding OpenCommand, Mode=OneWay}" 
+                          IsEnabled="{Binding CanNewGameExecute}" 
+                          InputGestureText="CTRL+O" />
+                <MenuItem Name="newGameMenuButton" 
+                          Header="_New Game" 
+                          Command="{Binding StartNewGameCommand}" 
+                          IsEnabled="{Binding CanNewGameExecute}" 
+                          InputGestureText="CTRL+N" />
                 <Separator />
-                <MenuItem Header="E_xit" Command="{Binding ExitCommand, Mode=OneWay}" InputGestureText="CTRL+X" />
+                <MenuItem Header="E_xit" 
+                          Command="{Binding ExitCommand, Mode=OneWay}" 
+                          InputGestureText="CTRL+X" />
             </MenuItem>
             <MenuItem Name="optionsButton" Header="_Options" Focusable="False" Click="optionsButton_Click" >
                 <MenuItem Name="settingsButton" Header="_Settings..." IsEnabled="{Binding CanNewGameExecute}" />
@@ -29,7 +41,7 @@
                 <MenuItem Header="_About 15 Puzzle..." />
             </MenuItem>
         </Menu>
-
+        <!--///////////////////////////  MainGrid ///////////////////////////-->
         <Grid Margin="0,20,0,25">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" MinWidth="350"/>
@@ -38,7 +50,17 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="350"/>
             </Grid.RowDefinitions>
+            <!--///////////////////////////  Puzzle Canvas Grid ///////////////////////////-->
             <Grid x:Name="Grid_1" Grid.Row="0" Grid.Column="0">
+                <Grid.Background>
+                <ImageBrush ImageSource="{Binding Background}" 
+                            Viewport="0,0,20,20"
+                            ViewportUnits="Absolute"
+                            TileMode="Tile"
+                            Stretch="None"
+                            AlignmentX="Left"
+                            AlignmentY="Top"/>
+                </Grid.Background>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -50,38 +72,38 @@
                         <RowDefinition Height="320"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <ItemsControl x:Name="itemsControl" ItemsSource="{Binding PuzzleCardsList, Mode=TwoWay}"  Grid.Row="1" Grid.Column="1" 
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
-                             ScrollViewer.VerticalScrollBarVisibility="Disabled" >
+                    <!--///////////////////////////  ItemsControl ///////////////////////////-->
+                    <ItemsControl x:Name="itemsControl" 
+                                  ItemsSource="{Binding PuzzleCardsList, Mode=TwoWay}"  
+                                  Grid.Row="1" Grid.Column="1" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"  
+                                  ScrollViewer.VerticalScrollBarVisibility="Disabled" >
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas Name="PuzzleCanvas"
                                         local:SizeObserver.Observe="True" 
                                         local:SizeObserver.ObservedWidth="{Binding ActualCanvasWidth, Mode=OneWayToSource}"
                                         local:SizeObserver.ObservedHeight="{Binding ActualCanvasHeight, Mode=OneWayToSource}"
-                                        Width="{Binding ActualCanvasHeight, Mode=OneWayToSource}" Height="{Binding ActualCanvasHeight, Mode=OneWayToSource}"  />
+                                        Width="{Binding ActualCanvasHeight, Mode=OneWayToSource}" 
+                                        Height="{Binding ActualCanvasHeight, Mode=OneWayToSource}"  />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
-                        
                         <ItemsControl.ItemContainerStyle>
                             <Style >
                                 <Setter Property="Canvas.Left" Value="{Binding X_CanvasPosition}"/>
                                 <Setter Property="Canvas.Top" Value="{Binding Y_CanvasPosition}"/>
                             </Style>
                         </ItemsControl.ItemContainerStyle>
-
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="local:PuzzleImage">
-
-                                <Image  Height="80" Width="80" Source="{Binding Image}" Focusable="True" MouseLeftButtonDown="FileImage_OnMouseUp"  />
-                               
+                                <Image  Height="80" 
+                                        Width="80" 
+                                        Source="{Binding Image}" 
+                                        Focusable="True" 
+                                        MouseLeftButtonDown="FileImage_OnMouseUp"  />
                             </DataTemplate>
-                            
-
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
-
                 </Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -90,12 +112,35 @@
                     <RowDefinition Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}"/>
                 </Grid.RowDefinitions>
             </Grid>
+            <!--///////////////////////////  Menu Grid ///////////////////////////-->
             <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="2*"/>
-                    <RowDefinition Height="5*"/>
+                    <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0" Grid.Column="0">
+                <!--////////////// "New Game" Button //////////////-->
+                <Grid Grid.Row="1" Grid.Column="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Name="startGameButton" 
+                            Content="New game" 
+                            Grid.Column="1" 
+                            Grid.Row="1" 
+                            Margin="5"
+                            MaxWidth="200" 
+                            MaxHeight="60" 
+                            MinWidth="80"  
+                            Focusable="False" 
+                            Command="{Binding StartNewGameCommand}" 
+                            IsEnabled="{Binding CanNewGameExecute}"/>
+                </Grid>
+                <!--////////////// Timer //////////////-->
+                <Grid Grid.Row="2" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="3*"/>
                         <ColumnDefinition Width="*"/>
@@ -105,19 +150,33 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Button Name="pauseButton" Grid.Column="0" Grid.Row="0"  Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" IsEnabled="{Binding GamePaused}" Focusable="False" >
+                        <Button Name="pauseButton" 
+                                Grid.Column="0" 
+                                Grid.Row="0"  
+                                Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" 
+                                MaxWidth="65" Margin="5" Command="{Binding TimerStopCommand}" 
+                                IsEnabled="{Binding GamePaused}" 
+                                Focusable="False" >
                             <Image Source="/Images/PauseIcon.png"/>
                         </Button>
-                        <Button Name="continueButton" Grid.Column="0" Grid.Row="1" Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" IsEnabled="{Binding GameContinue}" Focusable="False" >
+                        <Button Name="continueButton" 
+                                Grid.Column="0" 
+                                Grid.Row="1" 
+                                Height="{Binding Path=ActualWidth, RelativeSource={RelativeSource Self}}" 
+                                MaxWidth="65" Margin="5" Command="{Binding TimerContinueCommand}" 
+                                IsEnabled="{Binding GameContinue}" Focusable="False" >
                             <Image Source="/Images/PlayIcon.png"/>
                         </Button>
-                    </Grid>
-                    
-                    <TextBlock Margin="5" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="30" Text="{Binding Path=Time, Mode=TwoWay}" >
-                        
-                    </TextBlock>
+                    </Grid>   
+                    <TextBlock Margin="5" 
+                               TextWrapping="Wrap" 
+                               TextAlignment="Center" 
+                               VerticalAlignment="Center" 
+                               FontSize="30" 
+                               Text="{Binding Path=Time, Mode=TwoWay}" />
                 </Grid>
-                <Grid Grid.Row="1" Grid.Column="0">
+                <!--////////////// "Choose a picture" ComboBox "Choose new..." Button  //////////////-->
+                <Grid Grid.Row="3" Grid.Column="0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="4*"/>
@@ -127,26 +186,51 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    
                     <Grid Grid.Column="1" Grid.Row="0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Label Name="chooseLabel" Grid.Column="1" Grid.Row="0" Content="Choose a picture" HorizontalAlignment="Center"  />
-                        <ComboBox Name="imagesComboBox" Grid.Column="1" Grid.Row="1" 
-                              MaxWidth="300" MaxHeight="50" MinWidth="80" Focusable="False" Margin="5,0" ItemsSource="{Binding ListOfImages}" SelectedIndex="{Binding CurrentImageIndex, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" IsEnabled="{Binding CanNewGameExecute}" SelectionChanged="imagesComboBox_SelectionChanged" />    
+                        <Label Name="chooseLabel" 
+                               Grid.Column="1" 
+                               Grid.Row="0" 
+                               Content="Choose a picture" 
+                               HorizontalAlignment="Center" />
+                        <ComboBox Name="imagesComboBox"
+                                  Grid.Column="1" 
+                                  Grid.Row="1" 
+                                  MaxWidth="300" 
+                                  MaxHeight="50" 
+                                  MinWidth="80" 
+                                  Focusable="False" 
+                                  Margin="5,0" 
+                                  ItemsSource="{Binding LoadedImagesNames}" 
+                                  SelectedValue="{Binding SelectedImageValue}" 
+                                  VerticalContentAlignment="Center" 
+                                  HorizontalContentAlignment="Center" 
+                                  IsEnabled="{Binding CanNewGameExecute}" />    
                     </Grid>
-                    
-                    <Button Name="startGameButton" Content="New game" Grid.Column="1" Grid.Row="1" Margin="5"
-                            MaxWidth="200" MaxHeight="60" MinWidth="80"  Focusable="False" Command="{Binding StartNewGameCommand}" IsEnabled="{Binding CanNewGameExecute}" />
-                </Grid>
+                    <Grid Grid.Column="1" Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="2*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Button Name="chooseNewButton"
+                                Content="New Image..."
+                                Grid.Row="1"
+                                MaxWidth="300" 
+                                MaxHeight="50" 
+                                MinWidth="80" 
+                                Focusable="False" 
+                                Margin="5,0"
+                                Command="{Binding OpenCommand, Mode=OneWay}"/>
+                    </Grid>
+                    </Grid>
             </Grid>
         </Grid>
-        
+        <!--///////////////////////////  StatusBar ///////////////////////////-->
         <StatusBar DockPanel.Dock="Bottom" Height="25" VerticalAlignment="Bottom">
             <StatusBar.Background>
                 <SolidColorBrush Color="LightGray"/>

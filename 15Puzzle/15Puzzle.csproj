@@ -170,12 +170,6 @@
     <Resource Include="Images\Wood.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Grey.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Paint.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\PlayIcon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -191,10 +185,7 @@
     <Resource Include="Images\InformationIcon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Rafael.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Blank.jpg" />
+    <Resource Include="Images\Background.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

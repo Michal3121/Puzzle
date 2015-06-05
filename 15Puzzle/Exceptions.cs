@@ -22,4 +22,21 @@ namespace _15Puzzle
         {
         }
     }
+
+    public class ImagesHaveSameNamesException : Exception
+    {
+        public ImagesHaveSameNamesException()
+        {
+        }
+
+        public ImagesHaveSameNamesException(string message)
+            : base(message)
+        {
+        }
+
+        public ImagesHaveSameNamesException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
 }

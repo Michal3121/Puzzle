@@ -24,7 +24,5 @@
         <ComboBox Grid.Column="3" Grid.Row="2" Name="imagesComboBox" Margin="5" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
         <Button Grid.Column="1" Grid.Row="4" Name="okButton" Content="OK" Margin="5" Click="okButton_Click" />
         <Button Grid.Column="3" Grid.Row="4" Name="cancelButton" Content="Cancel" Margin="5" Click="cancelButton_Click" />
-        
-        
     </Grid>
 </Window>

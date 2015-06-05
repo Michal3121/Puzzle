@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,37 +21,57 @@ namespace _15Puzzle.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        #region Class Attributes
         private long timeElapsed;
         private DispatcherTimer timer;
         private PuzzleManager puzzleManager;
         Thread threadShuffle;
         private delegate void changeCanExecuteDelegat();
         private BitmapImage imageWood;
-        private BitmapImage imageGrey;
-        private BitmapImage imagePaint;
-        private BitmapImage imageRafael;
-        private BitmapImage imageCustom;
-        private BitmapImage _currentImage;
-        private bool notLoaded = true;
-        
+        private BitmapImage currentImage;
+        private string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private Dictionary<string, BitmapImage> _loadedImages;
+        //private string path = Directory.GetCurrentDirectory();
+        private string imagesDirectoryPath;
+        #endregion
+
         public MainViewModel()
         {
+            this.imagesDirectoryPath = imagesDirectoryPath = String.Format("{0}\\Images", path);
+            this._loadedImages = this.LoadImageFromFolder(this.imagesDirectoryPath);
+            this._loadedImagesNames = new List<string>(this._loadedImages.Keys);
+            //this.LoadedImagesNamesForOptions = this._loadedImagesNames;
+            this.LoadedImagesNamesForOptions = new List<string>(this._loadedImages.Keys);
             this.LoadRegistry();
             this.timeElapsed = 0;
             this.timer = new DispatcherTimer();
             this._actualCanvasHeight = 320;
             this._actualCanvasWidth = 320;
             this.puzzleManager = new PuzzleManager();
-            this.imageWood = new BitmapImage(new Uri("pack://application:,,,/Images/Wood.jpg", UriKind.Absolute));
-            this.imageGrey = new BitmapImage(new Uri("pack://application:,,,/Images/Grey.jpg", UriKind.Absolute));
-            this.imagePaint = new BitmapImage(new Uri("pack://application:,,,/Images/Paint.jpg", UriKind.Absolute));
-            this.imageRafael = new BitmapImage(new Uri("pack://application:,,,/Images/Rafael.jpg", UriKind.Absolute));
-            this.imageCustom = new BitmapImage(new Uri("pack://application:,,,/Images/Blank.jpg", UriKind.Absolute)); 
+            this.Background = new BitmapImage(new Uri("pack://application:,,,/Images/Background.bmp", UriKind.Absolute));
+            this.imageWood = new BitmapImage(new Uri("pack://application:,,,/Images/Wood.jpg", UriKind.Absolute)); // using as default image
             this._difficulty = this.GetDifficultyValue(this._difficultyIndex);
-            this._defaultImage = this.GetImage(this._defaultImageIndex);
-            this._currentImageIndex = this._defaultImageIndex;
-            this._currentImage = this._defaultImage;
-            this._puzzleCardsList = this.Image2Collection(this._currentImage);
+            this.currentImage = this.GetImage(this._defaultImageName);
+            this.SelectedImageValue = this._defaultImageName;
+            this._puzzleCardsList = this.Image2Collection(this.currentImage);
+        }
+
+        public BitmapImage Background { get; private set; }
+
+        public List<string> LoadedImagesNamesForOptions { get; private set; }
+
+        private List<string> _loadedImagesNames;
+        public List<string> LoadedImagesNames
+        {
+            get { return new List<string>(this._loadedImages.Keys); }
+            set 
+            {
+                if (this._loadedImagesNames != value)
+                {
+                    this._loadedImagesNames = value;
+                    RaisePropertyChanged("LoadedImagesNames");
+                }
+            }
         }
 
         private int _difficultyIndex;
@@ -80,16 +102,16 @@ namespace _15Puzzle.ViewModels
             }
         }
 
-        private int _defaultImageIndex;
-        public int DefaultImageIndex
+        private string _defaultImageName;
+        public string DefaultImageName
         {
-            get { return this._defaultImageIndex; }
+            get { return this._defaultImageName; }
             set 
             {
-                if (this._defaultImageIndex != value)
+                if (this._defaultImageName != value)
                 {
-                    this._defaultImageIndex = value;
-                    RaisePropertyChanged("DefaultImageIndex");
+                    this._defaultImageName = value;
+                    RaisePropertyChanged("DefaultImageName");
                 }
             }
         }
@@ -250,43 +272,35 @@ namespace _15Puzzle.ViewModels
             get { return this._listOfImages; }
         }
 
-        private int _currentImageIndex;
-        public int CurrentImageIndex
+        public string _selectedImageValue;
+        public string SelectedImageValue
         {
-            get { return this._currentImageIndex; }
+            get { return this._selectedImageValue; }
             set 
             {
-                if (this._currentImageIndex != value )
+                if (this._selectedImageValue != value)
                 {
                     this.GameStarted = false;
                     this.GamePaused = false;
                     this.GameContinue = false;
                     this.TimerReset();
                     this.ShufflingLabel = " ";
-                    this._currentImageIndex = value;
-                    if (this._currentImageIndex == 4 && notLoaded)
-                    {
-                        MessageBox.Show("You must choose a file first!", "Choose File", MessageBoxButton.OK, MessageBoxImage.Information);
-                        this.OpenFile();
-                        RaisePropertyChanged("CurrentImageIndex");
-                    }
-                    else
-                    {
-                        this._currentImage = this.GetImage(this._currentImageIndex);
-                        this.PuzzleCardsList = this.Image2Collection(this._currentImage);
-                        RaisePropertyChanged("CurrentImageIndex");
-                    }
+                    this._selectedImageValue = value;
+                    this.currentImage = this.GetImage(this._selectedImageValue);
+                    this.PuzzleCardsList = this.Image2Collection(this.currentImage);
+                    RaisePropertyChanged("SelectedImageValue");
                 }
             }
         }
 
+        #region Registry
         private void LoadRegistry()
         {
             RegistryKey key = Registry.CurrentUser.CreateSubKey
                 ("Software\\FIMU\\15Puzzle");
 
             this._difficultyIndex = (int)key.GetValue("DefaultDifficulty", 0);
-            this._defaultImageIndex = (int)key.GetValue("DefaultImage", 0);
+            this._defaultImageName = (string)key.GetValue("DefaultImageName", "Wood");
 
             key.Close();
         }
@@ -297,9 +311,94 @@ namespace _15Puzzle.ViewModels
                 ("Software\\FIMU\\15Puzzle", true);
 
             key.SetValue("DefaultDifficulty", this._difficultyIndex);
-            key.SetValue("DefaultImage", this._defaultImageIndex);
+            key.SetValue("DefaultImageName", this._defaultImageName);
 
             key.Close();
+        }
+        #endregion
+
+        public int GetDifficultyValue(int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return 20;
+                case 1:
+                    return 50;
+                case 2:
+                    return 100;
+                case 3:
+                    return 200;
+            }
+            return 50;
+        }
+
+        private BitmapImage GetImage(string name)
+        {
+            BitmapImage imageRet;
+            if (this._loadedImages.TryGetValue(name, out imageRet))
+            {
+                return imageRet;
+            }
+            this.SelectedImageValue = "Wood";
+            return imageWood;
+        }
+
+        private Dictionary<string, BitmapImage> LoadImageFromFolder(string path)
+        {
+            Dictionary<string, BitmapImage> loadedImages = new Dictionary<string, BitmapImage>();
+            string name = "";
+
+            string[] allImagesWithFullPath = Directory.GetFiles(this.imagesDirectoryPath);
+
+            foreach (string item in allImagesWithFullPath)
+            {
+                try
+                {
+                    name = Path.GetFileNameWithoutExtension(item);
+                    BitmapImage image = new BitmapImage(new Uri(item, UriKind.Absolute));
+                    int imageWidth = image.PixelWidth;
+                    int imageHeight = image.PixelHeight;
+
+                    if (imageWidth != imageHeight)
+                    {
+                        throw new NotSquareImageSizeException("NotSqureImageSizeException");
+                    }
+
+                    if (loadedImages.ContainsKey(name))
+                    {
+                        throw new ImagesHaveSameNamesException("SameNameException");
+                    }
+                    loadedImages.Add(name, image);
+                }
+                catch (ArgumentException)
+                {
+                    MessageBox.Show(String.Format("Image {0} could not be loaded.", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (UriFormatException)
+                {
+                    MessageBox.Show(String.Format("Image {0} could not be loaded.", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (NotSupportedException)
+                {
+                    MessageBox.Show(String.Format("Image {0} could not be displayed. Not supported format.", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (NotSquareImageSizeException)
+                {
+                    MessageBox.Show(String.Format("Image {0} does not have square size!", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (ImagesHaveSameNamesException)
+                {
+                    MessageBox.Show(String.Format("Image with name {0} already exists!", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show(String.Format("Image {0} could not be loaded.", name), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+
+            return loadedImages;
         }
 
         private ObservableCollection<PuzzleImage> Image2Collection(BitmapImage image)
@@ -362,6 +461,7 @@ namespace _15Puzzle.ViewModels
             }
         }
 
+        #region Commands
         public ICommand OpenCommand
         {
             get
@@ -370,6 +470,40 @@ namespace _15Puzzle.ViewModels
             }
         }
 
+        public ICommand ExitCommand
+        {
+            get
+            {
+                return new RelayCommand(() => Application.Current.Shutdown());
+            }
+        }
+
+        public ICommand StartNewGameCommand
+        {
+            get
+            {
+                return new RelayCommand(() => this.StartNewGameImpl(), () => this.CanNewGameExecute);
+            }
+        }
+
+        public ICommand TimerContinueCommand
+        {
+            get
+            {
+                return new RelayCommand(() => this.TimerContinueImpl());
+            }
+        }
+
+        public ICommand TimerStopCommand
+        {
+            get
+            {
+                return new RelayCommand(() => this.TimerStopImpl());
+            }
+        }
+        #endregion
+
+        #region CommandImpl
         public void OpenFile()
         {
             var ofd = new OpenFileDialog()
@@ -382,7 +516,6 @@ namespace _15Puzzle.ViewModels
                          "PNG (*.png)|*.png"
             };
 
-
             if (ofd.ShowDialog() == true)
             {
                 try
@@ -390,13 +523,16 @@ namespace _15Puzzle.ViewModels
                     this.GameStarted = false;
                     this.GamePaused = false;
                     this.GameContinue = false;
-                    _currentImage = new BitmapImage(new Uri(ofd.FileName, UriKind.Absolute));
-                    this.notLoaded = false;
-                    this.imageCustom = _currentImage;
-                    this.CurrentImageIndex = 4;
-                    this.PuzzleCardsList = this.Image2Collection(_currentImage);
-                    TimerReset();
+                    this._loadedImages.Remove("Custom");
+                    this.currentImage = new BitmapImage(new Uri(ofd.FileName, UriKind.Absolute));
+                    //BitmapImage imageCustom = currentImage;
+                    BitmapImage imageCustom = new BitmapImage(new Uri(ofd.FileName, UriKind.Absolute));
+                    this._loadedImages.Add("Custom", imageCustom);
+                    this.LoadedImagesNames = new List<string>(this._loadedImages.Keys);
+                    this.SelectedImageValue = "Custom";
+                    this.TimerReset();
                     this.ShufflingLabel = " ";
+                    this.PuzzleCardsList = this.Image2Collection(this.currentImage);
                 }
                 catch (ArgumentException)
                 {
@@ -420,15 +556,7 @@ namespace _15Puzzle.ViewModels
                 }
             }
         }
-
-        public ICommand ExitCommand
-        {
-            get
-            {
-                return new RelayCommand(() => Application.Current.Shutdown());
-            }
-        }
-
+ 
         private void SufflePuzzle()
         {
             this.CanNewGameExecute = false;
@@ -450,19 +578,16 @@ namespace _15Puzzle.ViewModels
             this.ShufflingLabel = " ";   
         }
 
-        public ICommand StartNewGameCommand
+        private void ChangeCanNewGameExecute()
         {
-            get 
-            {
-                return new RelayCommand(() => this.StartNewGameImpl(), () => this.CanNewGameExecute);   
-            }
+            this.CanNewGameExecute = !this.CanNewGameExecute;
         }
 
         public void StartNewGameImpl()
         {
             if (!this.IsPuzzleSolved(this._puzzleCardsList))
             {
-                this._puzzleCardsList = this.Image2Collection(this._currentImage);
+                this._puzzleCardsList = this.Image2Collection(this.currentImage);
             }
             threadShuffle = new Thread(SufflePuzzle);
             threadShuffle.IsBackground = true;
@@ -475,6 +600,39 @@ namespace _15Puzzle.ViewModels
             this.timer.Tick += new EventHandler(Each_Tick);
             this.timer.Start();
         }
+
+        public void TimerContinueImpl()
+        {
+            this.GamePaused = true;
+            this.GameStarted = true;
+            this.GameContinue = false;
+            this.ShufflingLabel = " ";
+            if (!this.IsPuzzleSolved(this._puzzleCardsList)) this.timer.Start();
+        }
+
+        public void TimerStopImpl()
+        {
+            this.timer.Stop();
+            this.GamePaused = false;
+            this.GameStarted = false;
+            this.GameContinue = true;
+            this.ShufflingLabel = "Game Paused";
+        }
+
+        public void Each_Tick(object o, EventArgs sender)
+        {
+            this.timeElapsed++;
+            TimeSpan t = TimeSpan.FromSeconds(this.timeElapsed);
+            this.Time = String.Format("{0:00}:{1:00}", t.Minutes, t.Seconds);
+        }
+
+        public void TimerReset()
+        {
+            this.timeElapsed = 0;
+            this.Time = String.Format("  :  ");
+            this.timer.Tick -= new EventHandler(Each_Tick);
+        }
+        #endregion
 
         private bool IsPuzzleSolved(ObservableCollection<PuzzleImage> puzzleImagesList)
         {
@@ -491,91 +649,5 @@ namespace _15Puzzle.ViewModels
             return true;
         }
 
-        private void ChangeCanNewGameExecute()
-        {
-            this.CanNewGameExecute = !this.CanNewGameExecute;
-        }
-
-        public void Each_Tick(object o, EventArgs sender)
-        {
-            this.timeElapsed++;
-            TimeSpan t = TimeSpan.FromSeconds(this.timeElapsed);
-            this.Time = String.Format("{0:00}:{1:00}", t.Minutes, t.Seconds);
-        }
-
-        public void TimerReset()
-        {
-            this.timeElapsed = 0;
-            this.Time = String.Format("  :  ");
-            this.timer.Tick -= new EventHandler(Each_Tick);
-        }
-
-        public ICommand TimerContinueCommand
-        {
-            get
-            {
-                return new RelayCommand(() => this.TimerContinueImpl());
-            }
-        }
-
-        public void TimerContinueImpl()
-        {
-            this.GamePaused = true;
-            this.GameStarted = true;
-            this.GameContinue = false;
-            this.ShufflingLabel = " ";
-            if(!this.IsPuzzleSolved(this._puzzleCardsList)) this.timer.Start();
-        }
-
-        public ICommand TimerStopCommand
-        {
-            get
-            {
-                return new RelayCommand(() => this.TimerStopImpl());
-            }
-        }
-
-        public void TimerStopImpl()
-        {
-            this.timer.Stop();
-            this.GamePaused = false;
-            this.GameStarted = false;
-            this.GameContinue = true;
-            this.ShufflingLabel = "Game Paused";
-        }
-
-        public int GetDifficultyValue(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return 20;
-                case 1:
-                    return 50;
-                case 2:
-                    return 100;
-                case 3:
-                    return 200;
-            }
-            return 50;
-        }
-
-        public BitmapImage GetImage(int n)
-        {
-            switch (n)
-            {
-                case 0:
-                    return this.imageWood;
-                case 1:
-                    return this.imageGrey;
-                case 2:
-                    return this.imagePaint;
-                case 3:
-                    return this.imageRafael;
-                case 4:
-                    return this.imageCustom;
-            }
-            return this.imageWood;
-        }
     }
 }

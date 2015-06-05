@@ -94,7 +94,7 @@ namespace _15Puzzle
             var frameworkElement = (FrameworkElement)sender;
             var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
 
-            OptionsDialog optionsDialog = new OptionsDialog() { SelectedDifficulty = viewModel.DifficultyIndex, SelectedImage = viewModel.DefaultImageIndex };
+            OptionsDialog optionsDialog = new OptionsDialog(viewModel) { SelectedDifficulty = viewModel.DifficultyIndex, SelectedImageName = viewModel.DefaultImageName };
             optionsDialog.Owner = this;
 
             bool wasStarted = viewModel.GameStarted;
@@ -107,8 +107,7 @@ namespace _15Puzzle
             {
                 viewModel.DifficultyIndex = optionsDialog.SelectedDifficulty;
                 viewModel.Difficulty = viewModel.GetDifficultyValue(viewModel.DifficultyIndex);
-                viewModel.DefaultImageIndex = optionsDialog.SelectedImage;
-                viewModel.DefaultImage = viewModel.GetImage(viewModel.DefaultImageIndex);
+                viewModel.DefaultImageName = optionsDialog.SelectedImageName;
             }
 
             viewModel.TimerContinueImpl();
@@ -117,17 +116,6 @@ namespace _15Puzzle
             if (!wasStarted) viewModel.GamePaused = false;
             viewModel.GameContinue = false;
             if (canContinue) viewModel.GamePaused = true;
-        }
-
-        private void imagesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var frameworkElement = (FrameworkElement)sender;
-            var viewModel = frameworkElement.DataContext as ViewModels.MainViewModel;
-
-            if (this.imagesComboBox.SelectedIndex == 4)
-            {
-                viewModel.CurrentImageIndex = 4;
-            }
         }
     }
 }
